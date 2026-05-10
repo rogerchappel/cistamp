@@ -1,58 +1,22 @@
 # Security Policy
 
-## Supported Versions
+CIStamp is local-first and does not make network calls in the V1 runtime path.
+It may still record sensitive local context such as command output, file paths,
+repository remotes, or environment-derived tool output.
 
-Replace this section with the supported versions for `cistamp`.
+## Reporting vulnerabilities
 
-Example:
+Please report security issues privately through GitHub security advisories when
+the repository is available, or contact the maintainer directly. Do not publish
+proof-of-concept secrets or exploit details before a fix is available.
 
-```md
-| Version | Supported |
-| --- | --- |
-| .x | Yes |
-| < .0 | No |
-```
+## Secret handling
 
-If the project does not publish versioned releases yet, say that clearly.
+Redaction is enabled by default, but it is best-effort. Review receipts before
+sharing them publicly, especially when commands print environment variables,
+configuration files, or verbose debug logs.
 
-## Reporting a Vulnerability
+## Supported versions
 
-Please do not report suspected vulnerabilities in public issues, pull requests, or discussions.
-
-Ask maintainers for the private security reporting path before sharing details.
-
-If no private reporting path exists yet, ask maintainers through public project channels for a private reporting path. Do not include exploit details, secrets, personal data, or sensitive technical details in public messages.
-
-## What to Include
-
-When a private reporting path is available, include:
-
-- A clear description of the issue.
-- Affected versions, files, packages, workflows, or configuration.
-- Steps to reproduce, proof of concept, or attack scenario when safe to share.
-- Potential impact.
-- Suggested mitigation, if known.
-
-## Response Expectations
-
-Maintainers review good-faith reports as capacity allows.
-
-Do not imply paid support, guaranteed response times, guaranteed fixes, or service-level agreements unless `cistamp` explicitly provides them.
-
-## Scope
-
-In scope:
-
-- Vulnerabilities in cistamp.
-- Insecure default configuration shipped by this project.
-- CI, release, or dependency guidance maintained by this project.
-
-Out of scope:
-
-- General support requests.
-- Requests for guaranteed maintenance timelines.
-- Issues in unrelated downstream projects.
-
-## Disclosure
-
-Coordinate disclosure with maintainers before publishing vulnerability details.
+The initial public line is `0.1.x`. Security fixes will target the latest minor
+release unless the project documents an expanded support window later.
