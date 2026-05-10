@@ -1,21 +1,9 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## 0.1.0 - Unreleased
 
-This project follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-format and uses semantic versioning when versioned releases are published.
-
-## [Unreleased]
-
-### Added
-
-- Initial project setup.
-
-## Release Links
-
-- Unreleased:
-  `https://github.com/rogerchappel/cistamp/compare/...HEAD`
-- Latest release:
-  `https://github.com/rogerchappel/cistamp/releases/latest`
-
-Replace placeholder links once the first release tag exists.
+- Scaffolded CIStamp as a StackForge OSS CLI project.
+- Added local command receipts with versions, git metadata, hashes, exit codes, and logs.
+- Added default redaction for common secrets.
+- Added JSON and Markdown receipt rendering.
+- Added checked-in fixtures, tests, smoke script, and validation flow.
