@@ -1,0 +1,23 @@
+{
+  "project": "cistamp",
+  "role": "local-ci-receipt-generator",
+  "defaultBranch": "main",
+  "offlineByDefault": true,
+  "slices": [
+    "receipt-model",
+    "command-runner",
+    "evidence-collectors",
+    "renderers",
+    "cli-ux",
+    "verification"
+  ],
+  "qualityGates": [
+    "npm run check",
+    "npm test",
+    "npm run build",
+    "npm run smoke",
+    "bash scripts/validate.sh"
+  ],
+  "writes": [".cistamp/latest.json", "caller-provided --out paths"],
+  "networkPolicy": "no network calls in V1 runtime"
+}
