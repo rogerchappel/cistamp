@@ -18,7 +18,7 @@ npm run build
 For local development you can run the built CLI directly:
 
 ```sh
-node dist/cli.js --help
+node dist/src/cli.js --help
 ```
 
 After publishing, use it as:
@@ -31,8 +31,8 @@ npx cistamp run -- npm test
 
 ```sh
 npm run build
-node dist/cli.js run -- npm test -- npm run build
-node dist/cli.js render .cistamp/latest.json --out verification.md
+node dist/src/cli.js run -- npm test -- npm run build
+node dist/src/cli.js render .cistamp/latest.json --out verification.md
 ```
 
 `cistamp run` writes `.cistamp/latest.json` by default. `cistamp render` turns
@@ -43,25 +43,25 @@ that JSON into a Markdown receipt.
 Run the checked-in fixture and render evidence:
 
 ```sh
-node dist/cli.js run \
+node dist/src/cli.js run \
   --out .cistamp/example.json \
   --markdown .cistamp/example.md \
   --hash examples/fixtures/pass.mjs \
   -- node examples/fixtures/pass.mjs
 
-node dist/cli.js render .cistamp/example.json --out .cistamp/example-rendered.md
+node dist/src/cli.js render .cistamp/example.json --out .cistamp/example-rendered.md
 ```
 
 Run multiple commands by separating each command with `--`:
 
 ```sh
-node dist/cli.js run -- npm test -- npm run build -- npm run smoke
+node dist/src/cli.js run -- npm test -- npm run build -- npm run smoke
 ```
 
 Use CIStamp as a non-blocking evidence collector:
 
 ```sh
-node dist/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
+node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 ```
 
 ## What gets recorded

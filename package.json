@@ -4,11 +4,11 @@
   "description": "Local CI receipt generator for reproducible command evidence.",
   "type": "module",
   "bin": {
-    "cistamp": "./dist/cli.js"
+    "cistamp": "./dist/src/cli.js"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/src/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/src/index.js"
   },
   "files": [
     "dist",
