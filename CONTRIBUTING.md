@@ -62,7 +62,7 @@ Next recommended task:
 
 ## Verification
 
-Every contribution should include verification.
+Every contribution should include verification. Behavior changes should include a CIStamp receipt or explain why one was not useful.
 
 Examples:
 
@@ -71,6 +71,7 @@ Examples:
 - Types: run the project typecheck.
 - Build: run the smallest build command that covers the change.
 - Manual QA: provide exact steps and observed result.
+- Receipts: run `npm run smoke` or `node dist/cli.js run -- <command>` and attach the Markdown receipt.
 
 If verification cannot be run, explain why and provide the exact command maintainers should run.
 
