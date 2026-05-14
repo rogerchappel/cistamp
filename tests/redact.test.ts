@@ -8,3 +8,10 @@ test('redacts common key-value secrets', () => {
   assert.equal(result.text.includes('supersecretvalue'), false);
   assert.equal(result.text.includes('ghp_1234567890'), false);
 });
+
+
+test('redacts Slack-style chat tokens from command logs', () => {
+  const result = redactText('SLACK_BOT_TOKEN=xoxb-123456789012-ABCDEFGHIJKL-secretvalue');
+  assert.equal(result.replacements, 1);
+  assert.equal(result.text.includes('xoxb-'), false);
+});

@@ -6,6 +6,7 @@ export interface RedactionResult {
 const patterns: RegExp[] = [
   /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{20,}\b/g,
   /\bsk-[A-Za-z0-9_-]{20,}\b/g,
+  /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/g,
   /\b[A-Za-z0-9._%+-]+:[A-Za-z0-9._~+/=-]{12,}@/g,
   /\b(?:api[_-]?key|token|secret|password|passwd|pwd)\s*[:=]\s*['\"]?[^\s'\"]{8,}/gi,
   /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g
