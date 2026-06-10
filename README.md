@@ -107,6 +107,19 @@ behavior changes, and keep the V1 path offline and deterministic.
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the
 [PRD](docs/PRD.md) for more context.
 
+## Development
+
+Use Node.js 20 or newer. Run the same checks locally before opening a PR:
+
+```sh
+npm run build
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
+
 ## License
 
 MIT
