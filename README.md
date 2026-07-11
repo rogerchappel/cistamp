@@ -59,7 +59,10 @@ the receipt, and checks the expected output files:
 bash demo/run-receipt-demo.sh
 ```
 
-The recording outline and short promotion hooks are in
+The companion walkthrough is
+[docs/tutorials/pr-verification-receipt.md](docs/tutorials/pr-verification-receipt.md).
+Recording outlines and short promotion hooks are in
+[docs/promo/pr-receipt-video-brief.md](docs/promo/pr-receipt-video-brief.md) and
 [docs/promo/receipt-demo-brief.md](docs/promo/receipt-demo-brief.md).
 
 Run multiple commands by separating each command with `--`:

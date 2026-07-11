@@ -1,31 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-tmp_dir="${TMPDIR:-/tmp}/cistamp-demo-$$"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="$ROOT/.cistamp/demo"
 
-cleanup() {
-  rm -rf "$tmp_dir"
-}
-trap cleanup EXIT
+cd "$ROOT"
+npm run build >/dev/null
 
-cd "$repo_root"
-npm run build
-
-mkdir -p "$tmp_dir"
+rm -rf "$OUT"
+mkdir -p "$OUT"
 
 node dist/src/cli.js run \
-  --out "$tmp_dir/receipt.json" \
-  --markdown "$tmp_dir/receipt.md" \
+  --out "$OUT/pass-receipt.json" \
+  --markdown "$OUT/pass-receipt.md" \
   --hash examples/fixtures/pass.mjs \
   -- node examples/fixtures/pass.mjs
 
-node dist/src/cli.js render "$tmp_dir/receipt.json" --out "$tmp_dir/rendered.md"
+node dist/src/cli.js render "$OUT/pass-receipt.json" --out "$OUT/pass-rendered.md"
 
-test -s "$tmp_dir/receipt.json"
-test -s "$tmp_dir/receipt.md"
-test -s "$tmp_dir/rendered.md"
-grep -q "CIStamp" "$tmp_dir/receipt.md"
-grep -q "examples/fixtures/pass.mjs" "$tmp_dir/rendered.md"
+grep -q 'CIStamp Receipt' "$OUT/pass-rendered.md"
+grep -q 'examples/fixtures/pass.mjs' "$OUT/pass-receipt.json"
+grep -q '"passed": true' "$OUT/pass-receipt.json"
+test -s "$OUT/pass-receipt.md"
+test -s "$OUT/pass-rendered.md"
 
-printf 'CIStamp demo artifacts written under %s\n' "$tmp_dir"
+echo "Demo receipt: $OUT/pass-receipt.json"
+echo "Demo markdown: $OUT/pass-rendered.md"
+sed -n '1,40p' "$OUT/pass-rendered.md"
