@@ -52,13 +52,18 @@ node dist/src/cli.js run \
 node dist/src/cli.js render .cistamp/example.json --out .cistamp/example-rendered.md
 ```
 
-Or run the fixture-backed demo script:
+For a reproducible demo that builds the CLI, runs the passing fixture, renders
+the receipt, and checks the expected output files:
 
 ```sh
 bash demo/run-receipt-demo.sh
 ```
 
-The companion walkthrough is [docs/tutorials/pr-verification-receipt.md](docs/tutorials/pr-verification-receipt.md), with a short recording brief in [docs/promo/pr-receipt-video-brief.md](docs/promo/pr-receipt-video-brief.md).
+The companion walkthrough is
+[docs/tutorials/pr-verification-receipt.md](docs/tutorials/pr-verification-receipt.md).
+Recording outlines and short promotion hooks are in
+[docs/promo/pr-receipt-video-brief.md](docs/promo/pr-receipt-video-brief.md) and
+[docs/promo/receipt-demo-brief.md](docs/promo/receipt-demo-brief.md).
 
 Run multiple commands by separating each command with `--`:
 

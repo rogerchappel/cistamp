@@ -21,6 +21,8 @@ node dist/src/cli.js render "$OUT/pass-receipt.json" --out "$OUT/pass-rendered.m
 grep -q 'CIStamp Receipt' "$OUT/pass-rendered.md"
 grep -q 'examples/fixtures/pass.mjs' "$OUT/pass-receipt.json"
 grep -q '"passed": true' "$OUT/pass-receipt.json"
+test -s "$OUT/pass-receipt.md"
+test -s "$OUT/pass-rendered.md"
 
 echo "Demo receipt: $OUT/pass-receipt.json"
 echo "Demo markdown: $OUT/pass-rendered.md"
