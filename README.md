@@ -98,7 +98,10 @@ node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 ## Limitations
 
 - Command execution is local and sequential.
-- Logs are bounded to the last 64KB per stream by default.
+- Logs are bounded to 64,000 UTF-8 bytes per stream by default. When truncation
+  occurs, the byte limit includes the `[cistamp: log truncated]` marker; the
+  retained tail always begins at a complete Unicode code point. For limits too
+  small to hold the marker, only the valid UTF-8 tail is retained.
 - Redaction catches obvious secrets, not every possible secret format.
 - Receipts include absolute working directories; review before publishing if path privacy matters.
 
