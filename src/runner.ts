@@ -55,19 +55,19 @@ async function runOne(spec: CommandSpec, index: number, cwd: string, maxLogBytes
   const startedAt = new Date(started).toISOString();
   return new Promise((resolveResult) => {
     const child = spawn(spec.command, spec.args, { cwd, shell: false, env: process.env });
-    let stdout = '';
-    let stderr = '';
+    const stdout = new BoundedLog(maxLogBytes);
+    const stderr = new BoundedLog(maxLogBytes);
 
     child.stdout?.setEncoding('utf8');
     child.stderr?.setEncoding('utf8');
-    child.stdout?.on('data', (chunk: string) => { stdout = appendBounded(stdout, chunk, maxLogBytes); });
-    child.stderr?.on('data', (chunk: string) => { stderr = appendBounded(stderr, chunk, maxLogBytes); });
+    child.stdout?.on('data', (chunk: string) => { stdout.append(chunk); });
+    child.stderr?.on('data', (chunk: string) => { stderr.append(chunk); });
     child.on('error', (error) => {
-      stderr = appendBounded(stderr, `${error.message}\n`, maxLogBytes);
-      resolveResult(done(spec, index, started, startedAt, 127, null, stdout, stderr));
+      stderr.append(`${error.message}\n`);
+      resolveResult(done(spec, index, started, startedAt, 127, null, stdout.value, stderr.value));
     });
     child.on('close', (exitCode, signal) => {
-      resolveResult(done(spec, index, started, startedAt, exitCode, signal, stdout, stderr));
+      resolveResult(done(spec, index, started, startedAt, exitCode, signal, stdout.value, stderr.value));
     });
   });
 }
@@ -95,10 +95,40 @@ function done(
   };
 }
 
-function appendBounded(existing: string, chunk: string, maxBytes: number): string {
-  const combined = existing + chunk;
-  if (Buffer.byteLength(combined, 'utf8') <= maxBytes) return combined;
-  return `[cistamp: log truncated to last ${maxBytes} bytes]\n${combined.slice(-maxBytes)}`;
+export class BoundedLog {
+  private readonly marker = '[cistamp: log truncated]\n';
+  private tail = '';
+  private truncated = false;
+
+  constructor(private readonly maxBytes: number) {}
+
+  append(chunk: string): void {
+    const combined = this.tail + chunk;
+    if (!this.truncated && Buffer.byteLength(combined, 'utf8') <= this.maxBytes) {
+      this.tail = combined;
+      return;
+    }
+
+    this.truncated = true;
+    const markerBytes = Buffer.byteLength(this.marker, 'utf8');
+    const contentBytes = markerBytes <= this.maxBytes ? this.maxBytes - markerBytes : this.maxBytes;
+    this.tail = utf8Tail(combined, contentBytes);
+  }
+
+  get value(): string {
+    const marker = this.truncated && Buffer.byteLength(this.marker, 'utf8') <= this.maxBytes
+      ? this.marker
+      : '';
+    return marker + this.tail;
+  }
+}
+
+function utf8Tail(value: string, maxBytes: number): string {
+  const bytes = Buffer.from(value, 'utf8');
+  if (bytes.length <= maxBytes) return value;
+  let start = bytes.length - maxBytes;
+  while (start < bytes.length && (bytes[start] & 0xc0) === 0x80) start += 1;
+  return bytes.subarray(start).toString('utf8');
 }
 
 export async function writeReceipt(receipt: Receipt, outPath: string): Promise<void> {
