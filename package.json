@@ -1,6 +1,7 @@
 {
   "name": "cistamp",
   "version": "0.1.0",
+  "private": false,
   "description": "Local CI receipt generator for reproducible command evidence.",
   "type": "module",
   "bin": {
@@ -40,6 +41,10 @@
   "license": "MIT",
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

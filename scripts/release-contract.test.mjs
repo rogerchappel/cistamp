@@ -20,13 +20,13 @@ test("release workflow satisfies the npm trusted-publishing contract", () => {
 
   const pack = position(/npm pack --json/, "pack the release artifact");
   const publish = position(
-    /npm publish ["']?\$\{?PACKAGE_FILE\}?['"]? --provenance --access public/,
+    /npm publish\s+["']?\$\{?PACKAGE_FILE\}?["']?\s+--provenance --access public/,
     "publish that exact artifact with provenance",
   );
   const githubRelease = position(/gh release create/, "create the GitHub release");
   assert.ok(pack < publish, "npm pack must happen before npm publish");
   assert.ok(publish < githubRelease, "npm publish must happen before the GitHub release");
-  assert.match(workflow, /gh release create[^\n]*["']?\$\{?PACKAGE_FILE\}?['"]?/);
+  assert.match(workflow, /gh release create[^\n]*["']?\$\{?PACKAGE_FILE\}?["']?/);
 });
 
 test("package metadata declares public provenance publication", () => {
