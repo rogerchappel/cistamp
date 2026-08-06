@@ -10,6 +10,21 @@ calls in the V1 runtime path. Just a crisp little stamp for the work you ran.
 
 ## Install
 
+Install the published CLI from npm:
+
+```sh
+npm install --global cistamp
+cistamp --help
+```
+
+Or run it without a global install:
+
+```sh
+npx cistamp run -- npm test
+```
+
+To work from a source checkout instead:
+
 ```sh
 npm install
 npm run build
@@ -19,12 +34,6 @@ For local development you can run the built CLI directly:
 
 ```sh
 node dist/src/cli.js --help
-```
-
-After publishing, use it as:
-
-```sh
-npx cistamp run -- npm test
 ```
 
 ## Quick start
@@ -135,6 +144,23 @@ npm run smoke
 npm run package:smoke
 npm run release:check
 ```
+
+## Publishing a release
+
+Maintainers publish by pushing a `v*.*.*` tag. Before the first release, add a
+trusted publisher for `cistamp` in the npm package settings with these values:
+
+- provider: GitHub Actions
+- organization or user: `rogerchappel`
+- repository: `cistamp`
+- workflow filename: `release.yml`
+- environment: leave blank
+
+The release workflow uses GitHub's short-lived OIDC identity; it does not need
+an `NPM_TOKEN` secret. It runs `npm run release:check`, packs one tarball,
+publishes that exact tarball publicly with provenance, and only then creates a
+GitHub release containing the same artifact. The tag must match the version in
+`package.json` (for example, version `0.1.0` uses tag `v0.1.0`).
 
 ## License
 
