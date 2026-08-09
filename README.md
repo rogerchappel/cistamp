@@ -10,33 +10,33 @@ calls in the V1 runtime path. Just a crisp little stamp for the work you ran.
 
 ## Install
 
-Install the published CLI from npm:
+CIStamp has not been published to npm yet. Until the first release, build and
+run it from a source checkout:
+
+```sh
+git clone https://github.com/rogerchappel/cistamp.git
+cd cistamp
+npm ci
+npm run build
+node dist/src/cli.js --help
+```
+
+After the first npm release, you will also be able to install the published CLI:
 
 ```sh
 npm install --global cistamp
 cistamp --help
 ```
 
-Or run it without a global install:
+Or run that published package without a global install:
 
 ```sh
 npx cistamp run -- npm test
 ```
 
-To work from a source checkout instead:
-
-```sh
-npm install
-npm run build
-```
-
-For local development you can run the built CLI directly:
-
-```sh
-node dist/src/cli.js --help
-```
-
 ## Quick start
+
+From the source checkout built above:
 
 ```sh
 npm run build
@@ -147,8 +147,10 @@ npm run release:check
 
 ## Publishing a release
 
-Maintainers publish by pushing a `v*.*.*` tag. Before the first release, add a
-trusted publisher for `cistamp` in the npm package settings with these values:
+The package is currently unpublished. Maintainers publish by pushing a
+`v*.*.*` tag. To make the post-release install commands above available, first
+add a trusted publisher for `cistamp` in the npm package settings with these
+values:
 
 - provider: GitHub Actions
 - organization or user: `rogerchappel`
