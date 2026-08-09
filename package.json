@@ -26,8 +26,9 @@
     "test": "npm run build && node --test dist/tests/*.test.js",
     "smoke": "npm run build && bash scripts/smoke.sh",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs",
+    "docs:contract": "node --test scripts/readme-contract.test.mjs",
     "release:contract": "node --test scripts/release-contract.test.mjs",
-    "release:check": "npm run release:contract && npm run check && npm test && npm run smoke && npm run package:smoke"
+    "release:check": "npm run docs:contract && npm run release:contract && npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "ci",
