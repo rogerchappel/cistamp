@@ -80,6 +80,16 @@ Run multiple commands by separating each command with `--`:
 node dist/src/cli.js run -- npm test -- npm run build -- npm run smoke
 ```
 
+To pass a literal `--` (and any following arguments) to a child command, write
+`---`. A bare `--` continues to start the next command:
+
+```sh
+node dist/src/cli.js run -- node script.mjs --- --child-option -- npm test
+```
+
+Here the first child receives `script.mjs`, `--`, and `--child-option`; CIStamp
+then runs `npm test` as the second command in the same receipt.
+
 Use CIStamp as a non-blocking evidence collector:
 
 ```sh

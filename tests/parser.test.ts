@@ -12,6 +12,21 @@ test('parseRunArgs splits commands on double dash', () => {
   ]);
 });
 
+test('parseRunArgs converts triple dash to a literal double-dash argument', () => {
+  const parsed = parseRunArgs(['--', 'node', 'script.mjs', '---', '--flag']);
+  assert.deepEqual(parsed.commands, [
+    { command: 'node', args: ['script.mjs', '--', '--flag'] }
+  ]);
+});
+
+test('parseRunArgs preserves command separators after a literal double dash', () => {
+  const parsed = parseRunArgs(['--', 'first', '---', 'value', '--', 'second', 'argument']);
+  assert.deepEqual(parsed.commands, [
+    { command: 'first', args: ['--', 'value'] },
+    { command: 'second', args: ['argument'] }
+  ]);
+});
+
 test('parseRunArgs rejects missing command', () => {
   assert.throws(() => parseRunArgs(['--out', 'receipt.json']), /No command provided/);
 });
