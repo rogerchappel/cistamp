@@ -75,13 +75,15 @@ function splitCommands(tokens: string[]): CommandSpec[] {
     if (token === '--') {
       if (current.length > 0) groups.push(current);
       current = [];
+    } else if (token === '---') {
+      current.push('--');
     } else {
       current.push(token);
     }
   }
   if (current.length > 0) groups.push(current);
 
-  if (groups.length === 0) throw new Error('No command provided. Use: cistamp run -- <command> [-- <command>]');
+  if (groups.length === 0) throw new Error('No command provided. Use: cistamp run -- <command> [-- <command>] (use --- to pass a literal --)');
   return groups.map(([command, ...commandArgs]) => ({ command, args: commandArgs }));
 }
 
