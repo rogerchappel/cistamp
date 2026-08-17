@@ -28,8 +28,7 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
     platform: process.platform,
     versions,
     git,
-    hashes: [...defaultHashes(options.cwd), ...hashFiles(options.cwd, options.hashPaths)]
-      .sort((a, b) => a.path.localeCompare(b.path)),
+    hashes: deduplicateHashes([...defaultHashes(options.cwd), ...hashFiles(options.cwd, options.hashPaths)]),
     redaction: { enabled: options.redact, replacements: 0 },
     commands: results,
     summary: {
@@ -43,6 +42,11 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   await writeReceipt(finalReceipt, options.out);
   if (options.markdownOut) await writeText(options.markdownOut, renderMarkdown(finalReceipt));
   return finalReceipt;
+}
+
+function deduplicateHashes(hashes: Receipt['hashes']): Receipt['hashes'] {
+  const byPath = new Map(hashes.map((hash) => [hash.path, hash]));
+  return [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path));
 }
 
 function applyReceiptRedaction(receipt: Receipt): Receipt {
