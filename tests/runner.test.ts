@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync } from 'node:fs';
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -20,6 +20,23 @@ test('runReceipt executes a local command and writes JSON', async () => {
   assert.equal(receipt.commands[0].exitCode, 0);
   assert.equal(receipt.commands[0].stdout.includes('supersecretvalue'), false);
   assert.equal(existsSync(out), true);
+});
+
+test('runReceipt emits one hash per normalized path across defaults and repeated --hash inputs', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
+  writeFileSync(join(dir, 'package.json'), '{}\n');
+  writeFileSync(join(dir, 'custom.txt'), 'custom\n');
+
+  const receipt = await runReceipt([], {
+    cwd: dir,
+    out: join(dir, 'receipt.json'),
+    redact: false,
+    failOn: 'command-failure',
+    hashPaths: ['package.json', './package.json', 'custom.txt', 'custom.txt'],
+    maxLogBytes: 16_000
+  });
+
+  assert.deepEqual(receipt.hashes.map((hash) => hash.path), ['custom.txt', 'package.json']);
 });
 
 test('bounded logs keep a valid UTF-8 tail independent of chunk boundaries', () => {
