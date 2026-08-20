@@ -35,4 +35,21 @@ test('CLI help documents command separators and literal double-dash arguments', 
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /-- separates commands; use --- to pass a literal -- argument/);
+  assert.match(result.stdout, /--hash <path>\s+Hash a required regular file/);
+});
+
+test('CLI fails clearly and writes no receipt for a missing explicit hash path', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-'));
+  const out = join(dir, 'receipt.json');
+  const cli = join(process.cwd(), 'dist/src/cli.js');
+  const result = spawnSync(process.execPath, [
+    cli, 'run', '--out', out, '--hash', 'missing.txt', '--', process.execPath, '-e', ''
+  ], {
+    cwd: dir,
+    encoding: 'utf8'
+  });
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Cannot hash requested path "missing.txt"/);
+  assert.throws(() => readFileSync(out, 'utf8'));
 });
