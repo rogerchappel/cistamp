@@ -39,6 +39,21 @@ test('runReceipt emits one hash per normalized path across defaults and repeated
   assert.deepEqual(receipt.hashes.map((hash) => hash.path), ['custom.txt', 'package.json']);
 });
 
+test('runReceipt rejects an explicit missing hash path without writing a receipt', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
+  const out = join(dir, 'receipt.json');
+
+  await assert.rejects(runReceipt([], {
+    cwd: dir,
+    out,
+    redact: false,
+    failOn: 'never',
+    hashPaths: ['missing.txt'],
+    maxLogBytes: 16_000
+  }), /Cannot hash requested path "missing.txt"/);
+  assert.equal(existsSync(out), false);
+});
+
 test('bounded logs keep a valid UTF-8 tail independent of chunk boundaries', () => {
   const input = `prefix-${'😀'.repeat(20)}-suffix`;
   const expectedBytes = 48;
