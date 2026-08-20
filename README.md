@@ -103,7 +103,9 @@ node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 - git branch, commit, dirty state, and origin URL when available
 - default hashes for package and lock files
 - caller-provided hashes via repeatable `--hash <path>` options; each normalized
-  path appears once, even when it overlaps a default or is requested repeatedly
+  path appears once, even when it overlaps a default or is requested repeatedly.
+  Explicit paths are required, readable regular files; invalid paths fail the run
+  without writing a receipt, while absent default package-manager files are skipped
 - command, arguments, start/finish time, duration, exit code, signal, stdout, and stderr
 - redaction status and replacement count
 
