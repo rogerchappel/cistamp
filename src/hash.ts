@@ -13,10 +13,10 @@ const defaultHashPaths = [
 ];
 
 export function defaultHashes(cwd: string): FileHash[] {
-  return hashFiles(cwd, defaultHashPaths);
+  return hashFiles(cwd, defaultHashPaths, { optional: true });
 }
 
-export function hashFiles(cwd: string, paths: string[]): FileHash[] {
+export function hashFiles(cwd: string, paths: string[], options: { optional?: boolean } = {}): FileHash[] {
   const unique = [...new Set(paths)].sort((a, b) => a.localeCompare(b));
   const hashes: FileHash[] = [];
 
@@ -24,15 +24,17 @@ export function hashFiles(cwd: string, paths: string[]): FileHash[] {
     const absolute = join(cwd, path);
     try {
       const stat = statSync(absolute);
-      if (!stat.isFile()) continue;
+      if (!stat.isFile()) throw new Error('not a regular file');
       const bytes = readFileSync(absolute);
       hashes.push({
         path: relative(cwd, absolute).replaceAll('\\', '/'),
         sha256: createHash('sha256').update(bytes).digest('hex'),
         bytes: stat.size
       });
-    } catch {
-      // Missing requested hash inputs are skipped so receipts work across package managers.
+    } catch (error) {
+      if (options.optional) continue;
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(`Cannot hash requested path ${JSON.stringify(path)}: ${detail}`);
     }
   }
 
