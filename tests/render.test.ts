@@ -35,3 +35,28 @@ test('renderMarkdown includes receipt summary and command logs', () => {
   assert.match(markdown, /node --version/);
   assert.match(markdown, /abc123/);
 });
+
+test('renderMarkdown expands inline delimiters around backticks in command arguments', () => {
+  const commandWithBackticks: Receipt = {
+    ...receipt,
+    commands: [{ ...receipt.commands[0], args: ['--eval', 'console.log(`value`)'] }]
+  };
+
+  const markdown = renderMarkdown(commandWithBackticks);
+  assert.match(markdown, /### 1\. ``node --eval console\.log\(`value`\)``/);
+});
+
+test('renderMarkdown preserves fence-like lines in stdout and stderr', () => {
+  const logsWithFences: Receipt = {
+    ...receipt,
+    commands: [{
+      ...receipt.commands[0],
+      stdout: 'before\n```text\ninside stdout\n```\nafter\n',
+      stderr: 'error before\n````\ninside stderr\n````\nerror after\n'
+    }]
+  };
+
+  const markdown = renderMarkdown(logsWithFences);
+  assert.ok(markdown.includes('````text\nbefore\n```text\ninside stdout\n```\nafter\n````'));
+  assert.ok(markdown.includes('`````text\nerror before\n````\ninside stderr\n````\nerror after\n`````'));
+});

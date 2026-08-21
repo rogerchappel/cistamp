@@ -3,6 +3,21 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import type { Receipt } from './types.js';
 
+function backtickDelimiter(value: string, minimum: number): string {
+  const longestRun = Math.max(0, ...Array.from(value.matchAll(/`+/g), match => match[0].length));
+  return '`'.repeat(Math.max(minimum, longestRun + 1));
+}
+
+function inlineCode(value: string): string {
+  const delimiter = backtickDelimiter(value, 1);
+  return `${delimiter}${value}${delimiter}`;
+}
+
+function fencedCode(value: string): string[] {
+  const delimiter = backtickDelimiter(value, 3);
+  return [`${delimiter}text`, value.trimEnd(), delimiter];
+}
+
 export function readReceipt(path: string): Receipt {
   return JSON.parse(readFileSync(path, 'utf8')) as Receipt;
 }
@@ -46,7 +61,7 @@ export function renderMarkdown(receipt: Receipt): string {
   lines.push('## Commands');
   lines.push('');
   for (const command of receipt.commands) {
-    lines.push(`### ${command.index + 1}. \`${[command.command, ...command.args].join(' ')}\``);
+    lines.push(`### ${command.index + 1}. ${inlineCode([command.command, ...command.args].join(' '))}`);
     lines.push('');
     lines.push(`- Exit code: \`${command.exitCode ?? 'null'}\``);
     lines.push(`- Duration: \`${command.durationMs}ms\``);
@@ -55,9 +70,7 @@ export function renderMarkdown(receipt: Receipt): string {
       lines.push('');
       lines.push('<details><summary>stdout</summary>');
       lines.push('');
-      lines.push('```text');
-      lines.push(command.stdout.trimEnd());
-      lines.push('```');
+      lines.push(...fencedCode(command.stdout));
       lines.push('');
       lines.push('</details>');
     }
@@ -65,9 +78,7 @@ export function renderMarkdown(receipt: Receipt): string {
       lines.push('');
       lines.push('<details><summary>stderr</summary>');
       lines.push('');
-      lines.push('```text');
-      lines.push(command.stderr.trimEnd());
-      lines.push('```');
+      lines.push(...fencedCode(command.stderr));
       lines.push('');
       lines.push('</details>');
     }
