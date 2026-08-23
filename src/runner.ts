@@ -11,6 +11,9 @@ import { getPackageVersion } from './version.js';
 import { collectVersions } from './versions.js';
 
 export async function runReceipt(commands: CommandSpec[], options: RunOptions): Promise<Receipt> {
+  if (options.markdownOut && resolve(options.out) === resolve(options.markdownOut)) {
+    throw new Error('JSON and Markdown output paths must be different');
+  }
   const startedAt = new Date().toISOString();
   const [versions, git] = await Promise.all([collectVersions(options.cwd), collectGitMetadata(options.cwd)]);
   const results: CommandResult[] = [];

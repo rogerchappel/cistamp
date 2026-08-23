@@ -88,6 +88,9 @@ export function renderMarkdown(receipt: Receipt): string {
 }
 
 export async function renderReceiptFile(input: string, out?: string): Promise<string> {
+  if (out && resolve(input) === resolve(out)) {
+    throw new Error('Receipt input and Markdown output paths must be different');
+  }
   const markdown = renderMarkdown(readReceipt(input));
   if (out) {
     const absolute = resolve(out);
