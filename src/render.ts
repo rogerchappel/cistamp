@@ -13,6 +13,15 @@ function inlineCode(value: string): string {
   return `${delimiter}${value}${delimiter}`;
 }
 
+function tableCode(value: string): string {
+  const escaped = value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('|', '&#124;');
+  return `<code>${escaped}</code>`;
+}
+
 function fencedCode(value: string): string[] {
   const delimiter = backtickDelimiter(value, 3);
   return [`${delimiter}text`, value.trimEnd(), delimiter];
@@ -55,7 +64,7 @@ export function renderMarkdown(receipt: Receipt): string {
   } else {
     lines.push('| Path | SHA-256 | Bytes |');
     lines.push('| --- | --- | ---: |');
-    for (const hash of receipt.hashes) lines.push(`| \`${hash.path}\` | \`${hash.sha256}\` | ${hash.bytes} |`);
+    for (const hash of receipt.hashes) lines.push(`| ${tableCode(hash.path)} | \`${hash.sha256}\` | ${hash.bytes} |`);
   }
   lines.push('');
   lines.push('## Commands');

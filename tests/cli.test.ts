@@ -54,6 +54,25 @@ test('CLI fails clearly and writes no receipt for a missing explicit hash path',
   assert.throws(() => readFileSync(out, 'utf8'));
 });
 
+test('CLI renders a hashed filename containing Markdown table syntax', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-hash-markdown-'));
+  const filename = 'a|b `<draft>&.md';
+  const out = join(dir, 'receipt.json');
+  const markdownOut = join(dir, 'receipt.md');
+  writeFileSync(join(dir, filename), 'hashed content\n');
+  const cli = join(process.cwd(), 'dist/src/cli.js');
+  const result = spawnSync(process.execPath, [
+    cli, 'run', '--out', out, '--markdown', markdownOut, '--hash', filename, '--',
+    process.execPath, '-e', 'process.stdout.write("ok")'
+  ], { cwd: dir, encoding: 'utf8' });
+
+  assert.equal(result.status, 0, result.stderr);
+  const markdown = readFileSync(markdownOut, 'utf8');
+  assert.ok(markdown.includes('| <code>a&#124;b `&lt;draft&gt;&amp;.md</code> |'));
+  const renderedReceipt = JSON.parse(readFileSync(out, 'utf8')) as Receipt;
+  assert.equal(renderedReceipt.hashes[0].path, filename);
+});
+
 test('CLI run rejects relative and absolute aliases before executing commands', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-collision-'));
   const destination = join(dir, 'receipt.json');
