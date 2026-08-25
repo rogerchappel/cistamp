@@ -177,6 +177,10 @@ publishes that exact tarball publicly with provenance, and only then creates a
 GitHub release containing the same artifact. The tag must match the version in
 `package.json` (for example, version `0.1.0` uses tag `v0.1.0`).
 
+Pull requests that change release inputs or workflows run the release dry run.
+It uses the same Node 24 and pinned npm 11.5.1 prerequisites as the publishing
+workflow, then performs the readiness and release checks without publishing.
+
 ## License
 
 MIT
