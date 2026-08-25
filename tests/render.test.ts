@@ -36,6 +36,16 @@ test('renderMarkdown includes receipt summary and command logs', () => {
   assert.match(markdown, /abc123/);
 });
 
+test('renderMarkdown keeps Markdown-sensitive hash paths in one table cell', () => {
+  const receiptWithSensitivePath: Receipt = {
+    ...receipt,
+    hashes: [{ path: 'docs/a|b `<draft>&.md', sha256: 'def456', bytes: 17 }]
+  };
+
+  const markdown = renderMarkdown(receiptWithSensitivePath);
+  assert.ok(markdown.includes('| <code>docs/a&#124;b `&lt;draft&gt;&amp;.md</code> | `def456` | 17 |'));
+});
+
 test('renderMarkdown expands inline delimiters around backticks in command arguments', () => {
   const commandWithBackticks: Receipt = {
     ...receipt,
