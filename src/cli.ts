@@ -53,7 +53,7 @@ async function renderCommand(args: string[]): Promise<number> {
     const token = args[index];
     if (token === '--out' || token === '-o') {
       out = args[++index];
-      if (!out) throw new Error(`${token} requires a value`);
+      if (!out || out.startsWith('-')) throw new Error(`${token} requires a value`);
     } else {
       throw new Error(`Unknown render option: ${token}`);
     }
