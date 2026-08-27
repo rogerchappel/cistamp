@@ -89,6 +89,6 @@ function splitCommands(tokens: string[]): CommandSpec[] {
 
 function requireValue(args: string[], index: number, option: string): string {
   const value = args[index];
-  if (!value) throw new Error(`${option} requires a value`);
+  if (!value || value.startsWith('-')) throw new Error(`${option} requires a value`);
   return value;
 }
