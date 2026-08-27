@@ -47,6 +47,9 @@ node dist/src/cli.js render .cistamp/latest.json --out verification.md
 `cistamp run` writes `.cistamp/latest.json` by default. `cistamp render` turns
 that JSON into a Markdown receipt.
 
+Options that take values reject a following option token, so a missing output,
+hash, mode, or byte-limit value fails before commands run or files are written.
+
 ## Examples
 
 Run the checked-in fixture and render evidence:
