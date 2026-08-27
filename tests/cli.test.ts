@@ -104,3 +104,38 @@ test('CLI render rejects relative and absolute input aliases without changing th
   assert.match(result.stderr, /Receipt input and Markdown output paths must be different/);
   assert.equal(readFileSync(input, 'utf8'), source);
 });
+
+for (const option of ['--out', '-o', '--markdown', '--hash', '--fail-on', '--max-log-bytes']) {
+  test(`CLI run rejects an option token as the value for ${option} before execution or writes`, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-missing-value-'));
+    const marker = join(dir, 'command-ran');
+    const receipt = join(dir, 'receipt.json');
+    const cli = join(process.cwd(), 'dist/src/cli.js');
+    const result = spawnSync(process.execPath, [
+      cli, 'run', option, '--no-redact', '--out', receipt, '--',
+      process.execPath, '-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`
+    ], { cwd: dir, encoding: 'utf8' });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, new RegExp(`${option.replace('-', '\\-')} requires a value`));
+    assert.throws(() => readFileSync(marker, 'utf8'));
+    assert.throws(() => readFileSync(receipt, 'utf8'));
+  });
+}
+
+for (const option of ['--out', '-o']) {
+  test(`CLI render rejects an option token as the value for ${option} without writing`, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-render-missing-value-'));
+    const input = join(dir, 'receipt.json');
+    writeFileSync(input, '{}\n');
+    const cli = join(process.cwd(), 'dist/src/cli.js');
+    const result = spawnSync(process.execPath, [cli, 'render', input, option, '--help'], {
+      cwd: dir,
+      encoding: 'utf8'
+    });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, new RegExp(`${option.replace('-', '\\-')} requires a value`));
+    assert.equal(readFileSync(input, 'utf8'), '{}\n');
+  });
+}

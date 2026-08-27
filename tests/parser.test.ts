@@ -30,3 +30,12 @@ test('parseRunArgs preserves command separators after a literal double dash', ()
 test('parseRunArgs rejects missing command', () => {
   assert.throws(() => parseRunArgs(['--out', 'receipt.json']), /No command provided/);
 });
+
+for (const option of ['--out', '-o', '--markdown', '--hash', '--fail-on', '--max-log-bytes']) {
+  test(`parseRunArgs rejects an option token as the value for ${option}`, () => {
+    assert.throws(
+      () => parseRunArgs([option, '--no-redact', '--', 'node', 'script.mjs']),
+      new RegExp(`${option.replace('-', '\\-')} requires a value`)
+    );
+  });
+}
