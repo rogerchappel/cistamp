@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, realpath, stat, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { collectGitMetadata } from './git.js';
@@ -14,6 +14,7 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   if (options.markdownOut && resolve(options.out) === resolve(options.markdownOut)) {
     throw new Error('JSON and Markdown output paths must be different');
   }
+  await rejectHashOutputCollisions(options);
   const startedAt = new Date().toISOString();
   const [versions, git] = await Promise.all([collectVersions(options.cwd), collectGitMetadata(options.cwd)]);
   const results: CommandResult[] = [];
@@ -45,6 +46,30 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   await writeReceipt(finalReceipt, options.out);
   if (options.markdownOut) await writeText(options.markdownOut, renderMarkdown(finalReceipt));
   return finalReceipt;
+}
+
+async function rejectHashOutputCollisions(options: RunOptions): Promise<void> {
+  const outputs = [options.out, options.markdownOut].filter((path): path is string => Boolean(path));
+  for (const hashPath of options.hashPaths) {
+    const hashAbsolute = resolve(options.cwd, hashPath);
+    const hashIdentity = await fileIdentity(hashAbsolute);
+    for (const output of outputs) {
+      const outputAbsolute = resolve(options.cwd, output);
+      const outputIdentity = await fileIdentity(outputAbsolute);
+      if (outputAbsolute === hashAbsolute || (hashIdentity && outputIdentity && hashIdentity === outputIdentity)) {
+        throw new Error(`Receipt output ${JSON.stringify(output)} must not overwrite a requested hash input ${JSON.stringify(hashPath)}`);
+      }
+    }
+  }
+}
+
+async function fileIdentity(path: string): Promise<string | undefined> {
+  try {
+    const [canonical, metadata] = await Promise.all([realpath(path), stat(path)]);
+    return `${canonical}:${metadata.dev}:${metadata.ino}`;
+  } catch {
+    return undefined;
+  }
 }
 
 function deduplicateHashes(hashes: Receipt['hashes']): Receipt['hashes'] {

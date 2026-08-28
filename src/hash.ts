@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { statSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { relative, resolve } from 'node:path';
 import type { FileHash } from './types.js';
 
 const defaultHashPaths = [
@@ -21,7 +21,7 @@ export function hashFiles(cwd: string, paths: string[], options: { optional?: bo
   const hashes: FileHash[] = [];
 
   for (const path of unique) {
-    const absolute = join(cwd, path);
+    const absolute = resolve(cwd, path);
     try {
       const stat = statSync(absolute);
       if (!stat.isFile()) throw new Error('not a regular file');
