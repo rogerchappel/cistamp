@@ -90,6 +90,26 @@ test('CLI run rejects relative and absolute aliases before executing commands', 
   assert.throws(() => readFileSync(marker, 'utf8'));
 });
 
+for (const outputOption of ['--out', '--markdown']) {
+  test(`CLI rejects ${outputOption} aliases of explicit hash inputs without modifying or executing`, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-hash-collision-'));
+    const source = join(dir, 'source.txt');
+    const marker = join(dir, 'command-ran');
+    writeFileSync(source, 'preserve me\n');
+    const cli = join(process.cwd(), 'dist/src/cli.js');
+    const result = spawnSync(process.execPath, [
+      cli, 'run', '--out', join(dir, 'receipt.json'), outputOption, 'source.txt',
+      '--hash', source, '--', process.execPath, '-e',
+      `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`
+    ], { cwd: dir, encoding: 'utf8' });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /must not overwrite a requested hash input/);
+    assert.equal(readFileSync(source, 'utf8'), 'preserve me\n');
+    assert.throws(() => readFileSync(marker, 'utf8'));
+  });
+}
+
 test('CLI render rejects relative and absolute input aliases without changing the receipt', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-cli-render-collision-'));
   const input = join(dir, 'receipt.json');
