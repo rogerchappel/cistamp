@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -52,6 +52,48 @@ test('runReceipt rejects an explicit missing hash path without writing a receipt
     maxLogBytes: 16_000
   }), /Cannot hash requested path "missing.txt"/);
   assert.equal(existsSync(out), false);
+});
+
+for (const outputType of ['json', 'markdown'] as const) {
+  test(`runReceipt rejects ${outputType} output aliases before executing commands`, async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
+    const source = join(dir, 'source.txt');
+    writeFileSync(source, 'preserve me\n');
+    const marker = join(dir, 'executed.txt');
+    const options = {
+      cwd: dir,
+      out: outputType === 'json' ? './source.txt' : join(dir, 'receipt.json'),
+      markdownOut: outputType === 'markdown' ? source : undefined,
+      redact: false,
+      failOn: 'never' as const,
+      hashPaths: [outputType === 'json' ? source : './source.txt'],
+      maxLogBytes: 16_000
+    };
+
+    await assert.rejects(runReceipt([
+      { command: process.execPath, args: ['-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`] }
+    ], options), /must not overwrite a requested hash input/);
+    assert.equal(readFileSync(source, 'utf8'), 'preserve me\n');
+    assert.equal(existsSync(marker), false);
+  });
+}
+
+test('runReceipt allows distinct hash and output paths', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
+  const source = join(dir, 'source.txt');
+  writeFileSync(source, 'preserve me\n');
+  await runReceipt([], {
+    cwd: dir,
+    out: join(dir, 'receipt.json'),
+    markdownOut: join(dir, 'receipt.md'),
+    redact: false,
+    failOn: 'never',
+    hashPaths: [source],
+    maxLogBytes: 16_000
+  });
+  assert.equal(readFileSync(source, 'utf8'), 'preserve me\n');
+  assert.equal(existsSync(join(dir, 'receipt.json')), true);
+  assert.equal(existsSync(join(dir, 'receipt.md')), true);
 });
 
 test('bounded logs keep a valid UTF-8 tail independent of chunk boundaries', () => {

@@ -14,6 +14,15 @@ test('hashFiles returns stable sha256 metadata for existing files', () => {
   assert.equal(hash.sha256, '5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03');
 });
 
+test('hashFiles accepts absolute requested paths and reports them relative to cwd', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-hash-'));
+  const fixture = join(dir, 'fixture.txt');
+  writeFileSync(fixture, 'hello\n');
+  const [hash] = hashFiles(dir, [fixture]);
+  assert.equal(hash.path, 'fixture.txt');
+  assert.equal(hash.bytes, 6);
+});
+
 test('hashFiles rejects missing paths and directories', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-hash-'));
   mkdirSync(join(dir, 'folder'));
