@@ -105,7 +105,7 @@ node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 - Node/npm/git versions when available
 - git branch, commit, dirty state, and origin URL when available
 - default hashes for package and lock files
-- caller-provided hashes via repeatable `--hash <path>` options; each normalized
+- caller-provided hashes via repeatable relative or absolute `--hash <path>` options; each normalized
   path appears once, even when it overlaps a default or is requested repeatedly.
   Explicit paths are required, readable regular files; invalid paths fail the run
   without writing a receipt, while absent default package-manager files are skipped
@@ -118,6 +118,7 @@ node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 - Disable redaction only when you really mean it: `--no-redact`.
 - Runtime is local-first and offline by default.
 - Hidden writes are limited to `.cistamp/latest.json` unless you pass `--out` or `--markdown`.
+- JSON and Markdown outputs must be distinct from every explicit `--hash` input; collisions fail before commands run or files are written.
 - CIStamp records evidence; it does not prove a machine was uncompromised.
 
 ## Limitations
