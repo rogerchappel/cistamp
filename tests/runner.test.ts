@@ -22,6 +22,25 @@ test('runReceipt executes a local command and writes JSON', async () => {
   assert.equal(existsSync(out), true);
 });
 
+test('runReceipt resolves relative JSON and Markdown outputs from its working directory', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-relative-'));
+
+  await runReceipt([], {
+    cwd: dir,
+    out: 'receipts/result.json',
+    markdownOut: 'receipts/result.md',
+    redact: false,
+    failOn: 'never',
+    hashPaths: [],
+    maxLogBytes: 16_000
+  });
+
+  assert.equal(existsSync(join(dir, 'receipts', 'result.json')), true);
+  assert.equal(existsSync(join(dir, 'receipts', 'result.md')), true);
+  assert.equal(existsSync(join(process.cwd(), 'receipts', 'result.json')), false);
+  assert.equal(existsSync(join(process.cwd(), 'receipts', 'result.md')), false);
+});
+
 test('runReceipt emits one hash per normalized path across defaults and repeated --hash inputs', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
   writeFileSync(join(dir, 'package.json'), '{}\n');
@@ -63,7 +82,7 @@ for (const outputType of ['json', 'markdown'] as const) {
     const options = {
       cwd: dir,
       out: outputType === 'json' ? './source.txt' : join(dir, 'receipt.json'),
-      markdownOut: outputType === 'markdown' ? source : undefined,
+      markdownOut: outputType === 'markdown' ? './source.txt' : undefined,
       redact: false,
       failOn: 'never' as const,
       hashPaths: [outputType === 'json' ? source : './source.txt'],
