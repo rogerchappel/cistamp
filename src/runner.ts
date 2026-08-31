@@ -11,7 +11,7 @@ import { getPackageVersion } from './version.js';
 import { collectVersions } from './versions.js';
 
 export async function runReceipt(commands: CommandSpec[], options: RunOptions): Promise<Receipt> {
-  if (options.markdownOut && resolve(options.out) === resolve(options.markdownOut)) {
+  if (options.markdownOut && resolve(options.cwd, options.out) === resolve(options.cwd, options.markdownOut)) {
     throw new Error('JSON and Markdown output paths must be different');
   }
   await rejectHashOutputCollisions(options);
@@ -43,8 +43,8 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   };
 
   const finalReceipt = options.redact ? applyReceiptRedaction(receipt) : receipt;
-  await writeReceipt(finalReceipt, options.out);
-  if (options.markdownOut) await writeText(options.markdownOut, renderMarkdown(finalReceipt));
+  await writeReceipt(finalReceipt, resolve(options.cwd, options.out));
+  if (options.markdownOut) await writeText(resolve(options.cwd, options.markdownOut), renderMarkdown(finalReceipt));
   return finalReceipt;
 }
 
