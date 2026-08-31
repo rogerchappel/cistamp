@@ -99,6 +99,13 @@ Use CIStamp as a non-blocking evidence collector:
 node dist/src/cli.js run --fail-on never -- node examples/fixtures/fail.mjs
 ```
 
+## Library API
+
+The exported `runReceipt(commands, options)` resolves relative `options.out` and
+`options.markdownOut` paths from `options.cwd`. Absolute output paths are used
+unchanged. Hash paths, command execution, output placement, and collision checks
+therefore share the same working-directory base.
+
 ## What gets recorded
 
 - CLI version and receipt schema version
