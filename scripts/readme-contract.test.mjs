@@ -14,24 +14,27 @@ function section(heading, nextHeading) {
   return readme.slice(start, end);
 }
 
-test("unpublished install guidance leads with a runnable source checkout", () => {
+test("install guidance verifies registry availability before npm usage", () => {
   const install = section("## Install", "## Quick start");
-  const postRelease = install.indexOf("After the first npm release");
+  const registryCheck = install.indexOf("npm view cistamp version");
+  const sourceCheckout = install.indexOf("git clone https://github.com/rogerchappel/cistamp.git");
+  const tarball = install.indexOf("npm pack");
+  const publishedInstall = install.indexOf("npm install --global cistamp@0.1.0");
+  const publishedNpx = install.indexOf("npx --yes cistamp@0.1.0");
 
-  assert.match(install, /has not been published to npm yet/i);
-  assert.notEqual(postRelease, -1, "npm commands must be labelled post-release");
+  assert.match(install, /not currently published on npm/i);
+  assert.notEqual(registryCheck, -1, "registry availability must be checked");
+  assert.match(install, /npm view cistamp@0\.1\.0 version/);
+  assert.ok(registryCheck < sourceCheckout && sourceCheckout < tarball);
+  assert.ok(tarball < publishedInstall && publishedInstall < publishedNpx);
 
-  const currentInstructions = install.slice(0, postRelease);
-  assert.match(currentInstructions, /git clone https:\/\/github\.com\/rogerchappel\/cistamp\.git/);
-  assert.match(currentInstructions, /npm ci/);
-  assert.match(currentInstructions, /npm run build/);
-  assert.match(currentInstructions, /node dist\/src\/cli\.js --help/);
-  assert.doesNotMatch(currentInstructions, /npm install --global cistamp/);
-  assert.doesNotMatch(currentInstructions, /npx cistamp/);
-
-  const futureInstructions = install.slice(postRelease);
-  assert.match(futureInstructions, /npm install --global cistamp/);
-  assert.match(futureInstructions, /npx cistamp/);
+  const sourceInstructions = install.slice(sourceCheckout, tarball);
+  assert.match(sourceInstructions, /npm ci/);
+  assert.match(sourceInstructions, /npm run build/);
+  assert.match(sourceInstructions, /node dist\/src\/cli\.js --help/);
+  assert.match(install, /E404|version differs/);
+  assert.match(install, /cistamp-0\.1\.0\.tgz/);
+  assert.match(install, /Once registry verification succeeds/);
 });
 
 test("publishing guidance remains consistent with unpublished status", () => {
