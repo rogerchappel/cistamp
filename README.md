@@ -10,8 +10,18 @@ calls in the V1 runtime path. Just a crisp little stamp for the work you ran.
 
 ## Install
 
-CIStamp has not been published to npm yet. Until the first release, build and
-run it from a source checkout:
+CIStamp is not currently published on npm. Before using npm installation
+commands, verify that a release is available and matches the repository version:
+
+```sh
+npm view cistamp version
+npm view cistamp@0.1.0 version
+```
+
+Both commands must succeed and report the expected version before using `npx`
+or installing globally. If the registry returns `E404` or the version differs,
+the published CLI is not available for this version; use a source checkout
+instead:
 
 ```sh
 git clone https://github.com/rogerchappel/cistamp.git
@@ -21,17 +31,25 @@ npm run build
 node dist/src/cli.js --help
 ```
 
-After the first npm release, you will also be able to install the published CLI:
+You can also create and install a local package tarball without publishing it:
 
 ```sh
-npm install --global cistamp
+npm pack
+npm install --global ./cistamp-0.1.0.tgz
 cistamp --help
 ```
 
-Or run that published package without a global install:
+Once registry verification succeeds, the published CLI can be installed globally:
 
 ```sh
-npx cistamp run -- npm test
+npm install --global cistamp@0.1.0
+cistamp --help
+```
+
+Or run that verified version without a global install:
+
+```sh
+npx --yes cistamp@0.1.0 run -- npm test
 ```
 
 ## Quick start
