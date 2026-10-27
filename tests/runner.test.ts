@@ -41,6 +41,27 @@ test('runReceipt resolves relative JSON and Markdown outputs from its working di
   assert.equal(existsSync(join(process.cwd(), 'receipts', 'result.md')), false);
 });
 
+test('runReceipt rejects colliding JSON and Markdown destinations before executing commands', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-colliding-'));
+  const output = join(dir, 'receipt.json');
+  const marker = join(dir, 'executed.txt');
+  const options = {
+    cwd: dir,
+    out: './receipt.json',
+    markdownOut: output,
+    redact: false,
+    failOn: 'never' as const,
+    hashPaths: [],
+    maxLogBytes: 16_000
+  };
+
+  await assert.rejects(runReceipt([
+    { command: process.execPath, args: ['-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`] }
+  ], options), /JSON and Markdown output paths must be different/);
+  assert.equal(existsSync(marker), false);
+  assert.equal(existsSync(output), false);
+});
+
 test('runReceipt emits one hash per normalized path across defaults and repeated --hash inputs', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
   writeFileSync(join(dir, 'package.json'), '{}\n');
