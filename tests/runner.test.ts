@@ -62,6 +62,32 @@ test('runReceipt rejects colliding JSON and Markdown destinations before executi
   assert.equal(existsSync(output), false);
 });
 
+test('runReceipt records a failing command and still writes requested receipts without retaining command artifacts', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-failure-'));
+  const out = join(dir, 'receipt.json');
+  const markdownOut = join(dir, 'receipt.md');
+  const artifact = join(dir, 'command-artifact.txt');
+  const script = `require('node:fs').writeFileSync(${JSON.stringify(artifact)}, 'temporary'); process.exit(7)`;
+
+  const receipt = await runReceipt([{ command: process.execPath, args: ['-e', script] }], {
+    cwd: dir,
+    out,
+    markdownOut,
+    redact: false,
+    failOn: 'command-failure',
+    hashPaths: [],
+    maxLogBytes: 16_000
+  });
+
+  assert.equal(receipt.summary.passed, false);
+  assert.equal(receipt.summary.failedCount, 1);
+  assert.equal(receipt.commands[0].exitCode, 7);
+  assert.equal(existsSync(artifact), true);
+  assert.equal(existsSync(out), true);
+  assert.equal(existsSync(markdownOut), true);
+  assert.deepEqual(JSON.parse(readFileSync(out, 'utf8')), receipt);
+});
+
 test('runReceipt emits one hash per normalized path across defaults and repeated --hash inputs', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
   writeFileSync(join(dir, 'package.json'), '{}\n');
