@@ -11,7 +11,7 @@ import { getPackageVersion } from './version.js';
 import { collectVersions } from './versions.js';
 
 export async function runReceipt(commands: CommandSpec[], options: RunOptions): Promise<Receipt> {
-  if (options.markdownOut && resolve(options.cwd, options.out) === resolve(options.cwd, options.markdownOut)) {
+  if (options.markdownOut && await sameFile(resolve(options.cwd, options.out), resolve(options.cwd, options.markdownOut))) {
     throw new Error('JSON and Markdown output paths must be different');
   }
   await rejectHashOutputCollisions(options);
@@ -48,6 +48,12 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   return finalReceipt;
 }
 
+async function sameFile(first: string, second: string): Promise<boolean> {
+  if (first === second) return true;
+  const [firstIdentity, secondIdentity] = await Promise.all([fileIdentity(first), fileIdentity(second)]);
+  return Boolean(firstIdentity && secondIdentity && firstIdentity === secondIdentity);
+}
+
 async function rejectHashOutputCollisions(options: RunOptions): Promise<void> {
   const outputs = [options.out, options.markdownOut].filter((path): path is string => Boolean(path));
   for (const hashPath of options.hashPaths) {
@@ -66,7 +72,7 @@ async function rejectHashOutputCollisions(options: RunOptions): Promise<void> {
 async function fileIdentity(path: string): Promise<string | undefined> {
   try {
     const [canonical, metadata] = await Promise.all([realpath(path), stat(path)]);
-    return `${canonical}:${metadata.dev}:${metadata.ino}`;
+    return `${metadata.dev}:${metadata.ino}`;
   } catch {
     return undefined;
   }

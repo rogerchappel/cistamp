@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, linkSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -61,6 +61,32 @@ test('runReceipt rejects colliding JSON and Markdown destinations before executi
   assert.equal(existsSync(marker), false);
   assert.equal(existsSync(output), false);
 });
+
+for (const aliasType of ['symlink', 'hard link'] as const) {
+  test(`runReceipt rejects JSON and Markdown outputs that alias the same file via ${aliasType} before executing commands`, async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-output-alias-'));
+    const target = join(dir, 'receipt.json');
+    const alias = join(dir, 'receipt.md');
+    const marker = join(dir, 'executed.txt');
+    writeFileSync(target, 'preserve me\n');
+    if (aliasType === 'symlink') symlinkSync(target, alias);
+    else linkSync(target, alias);
+
+    await assert.rejects(runReceipt([
+      { command: process.execPath, args: ['-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`] }
+    ], {
+      cwd: dir,
+      out: target,
+      markdownOut: alias,
+      redact: false,
+      failOn: 'never',
+      hashPaths: [],
+      maxLogBytes: 16_000
+    }), /JSON and Markdown output paths must be different/);
+    assert.equal(readFileSync(target, 'utf8'), 'preserve me\n');
+    assert.equal(existsSync(marker), false);
+  });
+}
 
 test('runReceipt records a failing command and still writes requested receipts without retaining command artifacts', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-failure-'));
