@@ -1,9 +1,27 @@
 import assert from 'node:assert/strict';
-import { existsSync, linkSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { BoundedLog, runReceipt } from '../src/runner.js';
+
+test('runReceipt rejects a directory output before executing commands', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-output-directory-'));
+  const outputDir = join(dir, 'receipt-dir');
+  const marker = join(dir, 'executed.txt');
+  mkdirSync(outputDir);
+  await assert.rejects(runReceipt([
+    { command: process.execPath, args: ['-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran')`] }
+  ], {
+    cwd: dir,
+    out: outputDir,
+    redact: false,
+    failOn: 'never',
+    hashPaths: [],
+    maxLogBytes: 16_000
+  }), /must be a file, not a directory/);
+  assert.equal(existsSync(marker), false);
+});
 
 test('runReceipt executes a local command and writes JSON', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cistamp-runner-'));
