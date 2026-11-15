@@ -11,6 +11,7 @@ import { getPackageVersion } from './version.js';
 import { collectVersions } from './versions.js';
 
 export async function runReceipt(commands: CommandSpec[], options: RunOptions): Promise<Receipt> {
+  await rejectDirectoryOutputs(options);
   if (options.markdownOut && await sameFile(resolve(options.cwd, options.out), resolve(options.cwd, options.markdownOut))) {
     throw new Error('JSON and Markdown output paths must be different');
   }
@@ -46,6 +47,19 @@ export async function runReceipt(commands: CommandSpec[], options: RunOptions): 
   await writeReceipt(finalReceipt, resolve(options.cwd, options.out));
   if (options.markdownOut) await writeText(resolve(options.cwd, options.markdownOut), renderMarkdown(finalReceipt));
   return finalReceipt;
+}
+
+async function rejectDirectoryOutputs(options: RunOptions): Promise<void> {
+  for (const output of [options.out, options.markdownOut].filter((path): path is string => Boolean(path))) {
+    try {
+      if ((await stat(resolve(options.cwd, output))).isDirectory()) {
+        throw new Error(`Receipt output ${JSON.stringify(output)} must be a file, not a directory`);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('must be a file, not a directory')) throw error;
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+  }
 }
 
 async function sameFile(first: string, second: string): Promise<boolean> {
