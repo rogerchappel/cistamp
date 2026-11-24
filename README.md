@@ -176,7 +176,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the
 
 ## Development
 
-Use Node.js 20 or newer. Run the same checks locally before opening a PR:
+Use Node.js 20 or newer, matching the versions tested in CI. Run the same checks locally before opening a PR:
 
 ```sh
 npm run build
