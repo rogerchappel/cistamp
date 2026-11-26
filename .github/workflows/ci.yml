@@ -23,5 +23,9 @@ jobs:
         run: npm ci
       - name: npm run build
         run: npm run build
-      - name: npm run release:check
-        run: npm run release:check
+      - name: npm test
+        run: npm test
+      - name: npm run smoke
+        run: npm run smoke
+      - name: npm run package:smoke
+        run: npm run package:smoke
